@@ -1,3 +1,0 @@
-[console_scripts]
-CLscraper = CLscraper.start:main
-
