@@ -14,6 +14,10 @@ def main():
     arguments=parser.parse_args()
     base_path=arguments.base_path[0]
     api=arguments.api[0]
+    
+    # set api key as global variable
+    with open(api, 'r') as file:
+        api_key=file.read().rstrip()
 
     # import craigslist search stem URLs from searches.py
     portland_stem=SEARCH_STEMS['portland_house']
@@ -25,13 +29,14 @@ def main():
     curr_time=datetime.datetime.today().strftime("%d%m%Y_%H:%M")
     logging.basicConfig(filename=os.path.join(log_path, curr_time + '.log.txt'), format='%(message)s    %(asctime)s',
                    level=logging.INFO, filemode='w')
-    print(os.path.join(log_path, curr_time + '.log.txt'))
+
     # check for database file, if not present, create empty database list
     database_file=os.path.join(database_path, 'CL_database.main.txt')
     if not os.path.exists(database_file):
         database=[]
+        DB=None
     else:
-        database=check_database(database_file)
+        DB, database=check_database(database_file)
     
     logging.info('Database currently contains %s listings' % (len(database)))
     # get urls from all posts that match our critera, then subset to those that aren't in our database
@@ -48,7 +53,7 @@ def main():
     fails=0
     for key, value in CL_dict.items():
         try:
-            outlist.append(extract_soup(value, key, file_path))
+            outlist.append(extract_soup(value, key, file_path, api_key))
         except:
             logging.info("Listing ID %s failed" % (key))
             fails+=1
@@ -59,7 +64,7 @@ def main():
         FIN=pd.concat([DB, out])
         FIN.to_csv(database_file, sep='\t', index=False)
     except:
-        logging.info('database outputs non-conformable, writing new data to %s' % (database_file.replace('main', str(date.today()))))
-        out.to_csv(database_file.replace('main', str(date.today())), sep='\t', index=False)  
+        logging.info('database outputs non-conformable, writing new data to %s' % (database_file.replace('main', str(datetime.date.today()))))
+        out.to_csv(database_file.replace('main', str(datetime.date.today())), sep='\t', index=False)  
     logging.info("%s listings added to database, %s listings failed" % (len(out), fails))
     return()

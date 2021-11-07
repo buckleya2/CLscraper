@@ -28,12 +28,12 @@ def create_paths(base_path: str) -> list:
     [exist_or_make(x) for x in out]
     return(out)
 
-def check_database(database_path: str) -> list:
+def check_database(database_path: str) -> tuple:
     """
     Function that checks status of current database file, and backs up current database file
     
     @param database_path: file path of database file
-    @returns: list of all craigslist post ID in database, errors out if database file provided is < 2 lines long
+    @returns: tuple of pd.DataFrame, list of all craigslist post ID in database, errors out if database file provided is < 2 lines long
     """
     with open(database_path,"r") as f:
         count = len(f.readlines())
@@ -45,7 +45,7 @@ def check_database(database_path: str) -> list:
         # read in current database
         DB=pd.read_csv(database_path, sep='\t')
         database=DB['index'].tolist()
-        return(database)
+        return(DB, database)
 
 def get_first(values: list):
     """

@@ -7,7 +7,7 @@ def parse_address(json) -> list:
     @param json: Google's reverse lookup json object
     @returns: a list with address, zipcode, neighborhood, and locality (Google defined)
     """
-    result=get_first(json['results'])
+    result=json['results'][0]
     address=result['formatted_address']
     zipcode, neighborhood, locality=(None, None, None)
     for entry in result['address_components']:
@@ -29,7 +29,7 @@ def reverse_lookup(key: str, lat: str, long: str) -> list:
     """
     # Google's reverse lookup API
     url='https://maps.googleapis.com/maps/api/geocode/json?latlng='
-    r=requests.get(url + lat + ',' + long + "&key=" + api_key)
+    r=requests.get(url + lat + ',' + long + "&key=" + key)
     json=r.json()
     # parse output
     address=parse_address(json)

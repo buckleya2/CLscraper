@@ -19,12 +19,16 @@ def scrape_data(url_list: list)-> dict:
     @returns: a dictionary with URL as key and BeautifulSoup object as the value
     """
     soup_dict={}
+    scrape_count=0
     for url in url_list:
         req=requests.get(url)
         content=req.text
         soup=bs4.BeautifulSoup(content)
         soup_dict[url]=soup
         time.sleep(np.random.randint(2,10))
+        scrape_count+=1
+        if scrape_count % 10 == 0:
+            print("%s listings completed / %s total" % (scrape_count, len(url_list)))
     return(soup_dict)
 
 def extract_links(soup_list: list) -> dict:
@@ -164,11 +168,11 @@ def property_management(body: str) -> str:
         company="".join([x for x in body.split(" ") if re.search(r'(http|www)[s]?', x.lower())])
     return(company)
 
-def count_caps_words(soup: bs4.BeautifulSoup) -> int:
+def count_caps_words(body: str) -> int:
     """
     Function that counts the number of ALL CAPS WORDS
     
-    @param soup: BeauftifulSoup object created from a craigslist posting
+    @param body: text of craigslist posting
     @returns: the number of emojis in the posting title
     """
     caps_words = [len(re.sub('[a-z0-9]', '', x))/len(x) for x in body.split(" ") if len(x) > 0]
@@ -206,9 +210,9 @@ def get_sqft(soup: bs4.BeautifulSoup, body: str) -> str:
             if x.text == '2' and x.find_previous_sibling():
                     sqft=x.find_previous_sibling().text
     # if sqft can't be found in a tag, try to pull it from text, add caveat (estimated)        
-    if sqft is None and re.search( r'ft', body):
+    if sqft is None and re.search(r'ft', body):
         try:
-            max_size=max([re.findall(r'\d+',x[0]) for x in re.findall( r'(( \w+){3}) ft', body)])
+            max_size=max([re.findall(r'\d+',x[0]) for x in re.findall( r'(( \w+){3}) ft', body)])[0]
             sqft=str(max_size) + "(estimated)"
         except:
             pass
@@ -264,7 +268,7 @@ def make_output(soup_metrics: list, dog: str, sqft: str, text_metrics: list, add
       'angry_score' : angry,
       'emoji' : emoji,
       'word_length' : word_length,
-      'address' : address,
+      'address' : postal_address,
       'snippet' : snippet,
       'zipcode' : zipcode,
       'neighborhood' : neighborhood,
@@ -278,7 +282,7 @@ def make_output(soup_metrics: list, dog: str, sqft: str, text_metrics: list, add
     df=pd.DataFrame.from_dict(results_dict, columns=list(results_dict[posting_id].keys()), orient='index')
     return(df)
 
-def extract_soup(soup: bs4.BeautifulSoup, url: str, file_path: str) -> pd.DataFrame:
+def extract_soup(soup: bs4.BeautifulSoup, url: str, file_path: str, api_key: str) -> pd.DataFrame:
     """
     Main function to parse useful metrics and data out of soup
     
