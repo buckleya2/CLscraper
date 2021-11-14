@@ -4,6 +4,7 @@ import email
 import io
 
 from CLscraper.helpers import *
+from CLscraper.maps import *
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -19,9 +20,10 @@ def make_post_text(values: pd.DataFrame):
     @returns: HTML text
     
     """
-    postid, price, location, snippet, link, lat, long=values[['index','price','locality','snippet','url','latitude','longitude']]
+    postid, price, location, snippet, link, lat, long, date_posted=values[['index','price','locality','snippet','url','latitude','longitude', 'date_posted']]
     body='<b>price:</b> %s<br><b>location:</b> \
-    %s<br><b>snippet:</b> %s<br><b>link:</b> %s' % (price, location, snippet, link)
+    %s<br><b>snippet:</b> %s<br><b>date posted:</b> \
+    %s<br><b>link:</b> %s' % (price, location, snippet, date_posted, link)
     return(body)
 
 def get_and_resize_image(soup):
@@ -54,7 +56,7 @@ def make_email_dict(df: pd.DataFrame, CL_dict: dict, api: str) -> dict:
     @returns: email_dict
     """
     email_dict={}
-    for row in df.head().iterrows():
+    for row in df.iterrows():
         postid=row[0]
         values=row[1]
         url=values['url']
