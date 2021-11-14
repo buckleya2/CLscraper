@@ -189,7 +189,7 @@ def metrics_from_text(body: str) -> list:
     @param body: post text stripped from HTML
     @returns: a list of metrics
     """
-    scam=bool(re.search(r'(lease to own)|(real estate agent)', body.lower()))
+    scam=bool(re.search(r'(lease to own)|(real estate agent)|(purchase program)|(realtor)', body.lower()))
     prop=property_management(body)
     angry=count_caps_words(body)
     word_length=len(body.split(" "))

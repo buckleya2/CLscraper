@@ -48,19 +48,15 @@ def check_new(database: list, url_dict: dict) -> list:
     new=[url_dict[key] for key, value in url_dict.items() if int(key) not in database]
     return(new)
 
-def get_map(lat, long, api):
+def get_map(lat, long, api_key):
     """
     Function to create a google stat map from a latitude, longitude pair
     
     @param lat: latitude
     @param long: longitude
-    @param api: google maps API key filepath
+    @param api: google maps API key
     @returns: a MIMEImage object of a google map PNG
     """
-    # read in API key
-    with open(api, 'r') as file:
-        api_key=file.read().rstrip()
-  
     # set parameters to create google map
     url = "https://maps.googleapis.com/maps/api/staticmap?"
     center_lat=str(lat)
