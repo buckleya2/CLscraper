@@ -1,4 +1,5 @@
 import requests
+from email.mime.image import MIMEImage
 
 def parse_address(json) -> list:
     """
@@ -46,3 +47,33 @@ def check_new(database: list, url_dict: dict) -> list:
     # for ids not in database, return url
     new=[url_dict[key] for key, value in url_dict.items() if int(key) not in database]
     return(new)
+
+def get_map(lat, long, api):
+    """
+    Function to create a google stat map from a latitude, longitude pair
+    
+    @param lat: latitude
+    @param long: longitude
+    @param api: google maps API key filepath
+    @returns: a MIMEImage object of a google map PNG
+    """
+    # read in API key
+    with open(api, 'r') as file:
+        api_key=file.read().rstrip()
+  
+    # set parameters to create google map
+    url = "https://maps.googleapis.com/maps/api/staticmap?"
+    center_lat=str(lat)
+    center_long=str(long)
+    zoom = 10
+    r = requests.get(url,
+                     params={"center" : center_lat + ',' + center_long,
+                             "zoom" : str(zoom),
+                             "size" : "200x200",
+                             "markers" :  center_lat + ',' + center_long,
+                            "key" : api_key})
+    if r.status_code == 200:
+        image=MIMEImage(r.content)
+    else:
+        image=None
+    return(image)
