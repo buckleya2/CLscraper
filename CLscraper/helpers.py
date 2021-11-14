@@ -78,3 +78,16 @@ def generate_search_urls(stem: str, max_res: int) -> list:
             link=stem + '&s=' + str(num)
             url_list.append(link)
     return(url_list)
+
+def filter_spam(df):
+    """
+    Function that takes in the craigslist database pd.DataFrame and subsets to likely real postings
+    
+    @param df: pd.DataFrame output by make_output()
+    @returns: pd.DataFrame with spam listings removed
+    """
+    spam_bool=((df.num_images > 2) & (df.scam == False) & \
+               (df.emoji < 2) & (~df.property_management.astype(str).str.contains('www|http')) & \
+               (pd.notnull(df.latitude)) & (df.dog != 'no'))
+    clean=df[spam_bool]
+    return(clean)
