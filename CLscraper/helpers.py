@@ -57,10 +57,8 @@ def get_first(values: list):
     out=None
     if len(values) > 0:
         out=values[0]
-        try:
+        if out.text:
             out=out.text.strip()
-        except:
-            pass
     return(out)
 
 def generate_search_urls(stem: str, max_res: int) -> list:
