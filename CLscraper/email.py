@@ -21,9 +21,9 @@ def make_post_text(values: pd.DataFrame):
     
     """
     postid, price, location, snippet, link, lat, long, date_posted=values[['index','price','locality','snippet','url','latitude','longitude', 'date_posted']]
-    body='<b>price:</b> %s<br><b>location:</b> \
-    %s<br><b>snippet:</b> %s<br><b>date posted:</b> \
-    %s<br><b>link:</b> %s' % (price, location, snippet, date_posted, link)
+    body='<tr><td><b>price:</b></td><td>%s</td></tr><tr><td><b>location:</b></td><td>%s</td></tr>\
+    <tr><td><b>date posted:</b></td><td>%s</td></tr><tr><td><b>snippet:</b></td><td>%s...</td></tr>\
+    <tr><td><b>link:</b></td><td>%s</td></tr>' % (price, location, date_posted, snippet, link)
     return(body)
 
 def get_and_resize_image(soup):
@@ -79,11 +79,12 @@ def make_html(email_dict: dict):
     outlist=[]
     for body, image_list in email_dict.items():
         num_images=len(image_list)
-        html=body + "<br>"
-        image_string="".join(['<img src="cid:image' + str(i) + ' ">' for i in range(start, num_images+start)]) + "<br>"
-        outlist.append(html + image_string)
+        html='<table>' + body + '<tr><td colspan="2">'
+        image_string=''.join(['<img align="center" width="50%" height="50%" src="cid:image' \
+                              + str(i) + '">' for i in range(start, num_images+start)])
+        outlist.append(html + image_string + '</td></tr></table>')
         start=start + num_images
-    msgText=MIMEText("".join(["<html><body>"] + outlist + ["</body></html>"]), 'html')
+    msgText=MIMEText(''.join(['<html><body>'] + outlist + ['</body></html>']), 'html')
     return(msgText)
 
 def add_images(message, email_dict: dict):
