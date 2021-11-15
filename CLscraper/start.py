@@ -68,9 +68,8 @@ def main():
     # filter spam and send email alert
     clean=filter_spam(out)
     print("%s non-spam postings" % (len(clean))) 
-    print(clean)
     email_dict=make_email_dict(clean, CL_dict, api_key)
-    print(email_dict)
+    print(len(email_dict))
     message=create_email('me', mailto, 'Housing Email Alert', email_dict)
     send_message(gmail_creds, message)
     try:

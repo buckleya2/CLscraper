@@ -124,7 +124,8 @@ def metrics_from_soup(soup: bs4.BeautifulSoup) -> list:
     size - number of beds and baths
     images - number of images attached to posting
     emoji - number of emojis in post title
-    
+    scam - a T/F indicator for scam keywords
+
     @param soup: BeautifulSoup object created from a craigslist posting
     @returns: a list of metrics 
     """
@@ -133,10 +134,11 @@ def metrics_from_soup(soup: bs4.BeautifulSoup) -> list:
     size=get_first(soup.findAll('span', {'class' : 'shared-line-bubble'}))
     images=len(soup.findAll("a", {"class":"thumb"}))
     emoji=count_title_emoji(soup)
+    scam=bool(re.search(r'lease to own|rent to own|real estate agent|purchase program|realtor|loftium', soup.text.lower()))
     
     posting_id, posted, updated=parse_posting_info(soup)
     lat, long=get_coords(soup)
-    return([lat, long, posting_id, posted, updated, price, available, size, images, emoji])
+    return([lat, long, posting_id, posted, updated, price, available, size, images, emoji, scam])
 
 def get_posting_text(soup: bs4.BeautifulSoup) -> str:
     """
@@ -181,7 +183,6 @@ def count_caps_words(body: str) -> int:
 def metrics_from_text(body: str) -> list:
     """
     Function that returns a number of metrics from the post text
-    scam - a T/F indicator for scam keywords
     prop - property managment company name (from list) or web link found in post
     angry - number of all caps words
     word_length - number of words in post
@@ -189,11 +190,10 @@ def metrics_from_text(body: str) -> list:
     @param body: post text stripped from HTML
     @returns: a list of metrics
     """
-    scam=bool(re.search(r'(lease to own)|(real estate agent)|(purchase program)|(realtor)', body.lower()))
     prop=property_management(body)
     angry=count_caps_words(body)
     word_length=len(body.split(" "))
-    return([scam, prop, angry, word_length])
+    return([prop, angry, word_length])
 
 def get_sqft(soup: bs4.BeautifulSoup, body: str) -> str:
     """
@@ -251,8 +251,8 @@ def make_output(soup_metrics: list, dog: str, sqft: str, text_metrics: list, add
     @param url: posting URL
     @returns
     """
-    lat, long, posting_id, posted, updated, price, available, size, images, emoji=soup_metrics
-    scam, prop, angry, word_length=text_metrics
+    lat, long, posting_id, posted, updated, price, available, size, images, emoji, scam=soup_metrics
+    prop, angry, word_length=text_metrics
     postal_address, zipcode, neighborhood, locality=address
     
     results_dict={posting_id : 
